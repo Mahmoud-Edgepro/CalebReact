@@ -34,7 +34,9 @@ export default function Definition() {
       .then((data) => {
         setWord(data[0].meanings); // Set the meanings to `word`
       })
-      .catch((e) => {console.log(e.message)}); // Log any fetch errors
+      .catch((e) => {
+        console.log(e.message)
+      }); // Log any fetch errors
   }, []);
 
   if (notFound === true) {
