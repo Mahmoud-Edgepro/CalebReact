@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import NotFound from "../components/NotFound";
 import DefinitionSearch from "../components/DefinitionSearch";
@@ -11,6 +11,8 @@ export default function Definition() {
   let { search } = useParams();
   const navigate = useNavigate();
 
+  const location = useLocation();
+
   useEffect(() => {
     //const url ="https://xcklhklvhdfklhdfjklghdfjkghjkdhgk.com";
     //const url ="https://httpstat.us/500";
@@ -20,7 +22,11 @@ export default function Definition() {
         if (response.status === 404) {
           setNotFound(true);
         } else if (response.status === 401) {
-          navigate("/login");
+          navigate("/login", {
+            state: {
+              previousUrl: location.pathname,
+            },
+          });
         } else if (response.status === 500) {
            setError(true);
         }
