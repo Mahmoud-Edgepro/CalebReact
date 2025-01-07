@@ -3,76 +3,50 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { baseUrl } from "../Shared";
 import AddCustomer from "../components/AddCustomer";
 import { LoginContext } from "../App";
+import useFetch from "../hooks/UseFetch";
 
 export default function Customers() {
   const [loggedIn, setLoggedIn] = useContext(LoginContext);
-  const [customers, setCustomers] = useState();
+  //const [customers, setCustomers] = useState();
   const [show, setShow] = useState(false);
 
   function toggleShow() {
     setShow(!show);
   }
-
   const navigate = useNavigate();
   const location = useLocation();
 
+  const url = baseUrl + "api/customers/";
+  const { request, appendData, data: {customers} = {}, errorStatus } = useFetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + localStorage.getItem("access"),
+    },
+  });
+
   useEffect(() => {
-    const url = baseUrl + "api/customers/";
-    fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access"),
-      },
-    })
-      .then((response) => {
-        if (response.status === 401) {
-          setLoggedIn(false);
-          navigate("/login", {
-            state: {
-              previousUrl: location.pathname,
-            },
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setCustomers(data.customers);
-      });
-  }, []);
+    request();
+  }, [])
+  
+  // useEffect(() => {
+  //   console.log(request, appendData, customers, errorStatus);
+  // });
+
 
   function newCustomer(name, industry) {
-    const data = {
-      name: name,
-      industry: industry,
-    };
-    const url = baseUrl + "api/customers/";
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Something went wrong");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        toggleShow();
-        console.log(data);
-        setCustomers([...customers, data.customer]);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    appendData({name: name, industry:industry});
+
+    if(!errorStatus){
+      toggleShow();
+    }
   }
+  
   return (
     <>
       <h1>Here are our customers:</h1>
       {customers
-        ? customers.map((customer) => {
+         ?customers.map((customer) => {
             return (
               <div className="m-2" key={customer.id}>
                 <Link to={"/customers/" + customer.id}>

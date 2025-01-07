@@ -13,15 +13,15 @@ export default function Definition() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const [word, errorStatus] = useFetch(
-    "https://api.dictionaryapi.dev/api/v2/entries/en/" + search
+  const { request, data: [{ meanings: word }] = [{}], errorStatus } = useFetch(
+    "https://api.dictionaryapi.dev/api/v2/entries/en/" + search,
+    { method: "GET" }
   );
 
   useEffect(() => {
-    console.log("word: ", word, "errorStatus: ", errorStatus);
-  })
+    request();
+  }, []);
 
- 
   if (errorStatus === 404) {
     return (
       <>
@@ -38,13 +38,13 @@ export default function Definition() {
       </>
     );
   }
- 
+
   return (
     <>
-      {word?.[0]?.meanings? (
+      {word ? (
         <>
           <h1>Here is a definition:</h1>
-          {word[0].meanings.map((meaning) => {
+          {word.map((meaning) => {
             return (
               <p key={uuidv4()}>
                 {meaning.partOfSpeech + ": "}
